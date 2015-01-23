@@ -1,7 +1,7 @@
 CC=clang++
-CFLAGS=-c -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+CFLAGS=-c -I. -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
 LDFLAGS=
-SOURCES=cookie_bouncer.cpp
+SOURCES=main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 EXECUTABLE=cb
 

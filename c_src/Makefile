@@ -13,7 +13,7 @@ SOURCES=cookie_bouncer.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 SHOBJ=cookie_bouncer.so
 
-all: $(SOURCES) $(SHOBJ)
+all: $(SOURCES) $(HEADERS) $(SHOBJ)
 
 $(SHOBJ): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -o $@

@@ -11,7 +11,7 @@ namespace adroll {
   template<typename counter>
   class cookie_bouncer {
   public:
-    cookie_bouncer(double halflife = 1.0) : tau(halflife / std::log(2)) {}
+    cookie_bouncer(double halflife = 60.0) : tau(halflife / std::log(2)) {}
 
     void incr(const std::string key) {
       std::lock_guard<std::mutex> lock(mtx);

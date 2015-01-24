@@ -1,6 +1,14 @@
 CC=clang++
-CFLAGS=-c -I/Users/blt/.kerl/installs/r16b02/usr/include/ -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+CFLAGS=-c -I${ERL_ROOT}/usr/include/ -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+LDFLAGS=-shared -fPIC
+endif
+ifeq ($(UNAME), Darwin)
 LDFLAGS=-undefined dynamic_lookup -dynamiclib
+endif
+
 SOURCES=cookie_bouncer.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 SHOBJ=cookie_bouncer.so
@@ -12,3 +20,10 @@ $(SHOBJ): $(OBJECTS)
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@
+
+clean:
+	@rm -f *.so
+	@rm -f *.o
+	@rm -f *.beam
+
+.PHONY: clean

@@ -1,14 +1,14 @@
 CC=clang++
-CFLAGS=-c -I. -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
-LDFLAGS=
-SOURCES=main.cpp
+CFLAGS=-c -I/Users/blt/.kerl/installs/r16b02/usr/include/ -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+LDFLAGS=-undefined dynamic_lookup -dynamiclib
+SOURCES=cookie_bouncer.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-EXECUTABLE=cb
+SHOBJ=cookie_bouncer.so
 
-all: $(SOURCES) $(EXECUTABLE)
+all: $(SOURCES) $(SHOBJ)
 
-$(EXECUTABLE): $(OBJECTS)
-	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
+$(SHOBJ): $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -shared -o $@
 
 .cpp.o:
 	$(CC) $(CFLAGS) $< -o $@

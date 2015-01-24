@@ -1,4 +1,5 @@
 *.beam
 *.o
 *.so
+*.d
 *.app

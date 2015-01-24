@@ -1,5 +1,5 @@
 CC=clang++
-CFLAGS=-c -I${ERL_ROOT}/usr/include/ -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+CFLAGS=-c -I${ERL_ROOT}/usr/include/ -MMD -MP -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)
@@ -11,9 +11,11 @@ endif
 
 SOURCES=cookie_bouncer.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
+DEP=$(SOURCES:.cpp=.d)
+-include $(DEP)
 SHOBJ=cookie_bouncer.so
 
-all: $(SOURCES) $(HEADERS) $(SHOBJ)
+all: $(SOURCES) $(SHOBJ)
 
 $(SHOBJ): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -shared -o $@
@@ -22,8 +24,7 @@ $(SHOBJ): $(OBJECTS)
 	$(CC) $(CFLAGS) $< -o $@
 
 clean:
-	@rm -f *.so
-	@rm -f *.o
+	@rm -f $(OBJECTS) $(DEP) $(SHOBJ)
 	@rm -f *.beam
 
 .PHONY: clean

@@ -13,14 +13,18 @@ namespace adroll {
   public:
     cookie_bouncer(double halflife = 60.0) : tau(halflife / std::log(2)) {}
 
+    cookie_bouncer(const cookie_bouncer&& cb)
+      : tau(cb.tau), kv(cb.kv) {}
+
     void incr(const std::string key) {
       std::lock_guard<std::mutex> lock(mtx);
       auto search = kv.find(key);
       if (search != kv.end()) {
         (search->second).incr();
       } else {
-        auto dc = counter{ tau };
-        kv.emplace(std::make_pair(key, std::move(dc)));
+        kv.emplace(std::piecewise_construct,
+                   std::forward_as_tuple(key),
+                   std::forward_as_tuple(tau));
       }
     }
 

@@ -1,5 +1,26 @@
-CC=clang++
-CFLAGS=-c -I${ERL_ROOT}/usr/include/ -MMD -MP -O2 -Wall -Wextra -pedantic -Weffc++ --std=c++11
+CC=c++
+WARNINGS=-Wall -Weffc++ -pedantic  \
+    -pedantic-errors -Wextra -Waggregate-return -Wcast-align \
+    -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \
+    -Wdisabled-optimization \
+    -Werror -Wfloat-equal  -Wformat  -Wformat=2 \
+    -Wformat-nonliteral -Wformat-security  \
+    -Wformat-y2k \
+    -Wimplicit  -Wimport  -Winit-self  -Winline \
+    -Winvalid-pch -Wlong-long -Wmissing-braces \
+    -Wmissing-field-initializers -Wmissing-format-attribute   \
+    -Wmissing-include-dirs -Wmissing-noreturn \
+    -Wpacked -Wparentheses  -Wpointer-arith \
+    -Wredundant-decls -Wreturn-type \
+    -Wsequence-point  -Wshadow -Wsign-compare  -Wstack-protector \
+    -Wstrict-aliasing -Wstrict-aliasing=2 -Wswitch  -Wswitch-default \
+    -Wswitch-enum -Wtrigraphs  -Wuninitialized \
+    -Wunknown-pragmas  -Wunreachable-code -Wunused \
+    -Wunused-function  -Wunused-label  -Wunused-parameter \
+    -Wunused-value  -Wunused-variable  -Wvariadic-macros \
+    -Wvolatile-register-var  -Wwrite-strings
+FIXME_WARNINGS=-Wno-sign-conversion -Wno-shorten-64-to-32
+CFLAGS=-c -I${ERL_ROOT}/usr/include/ -MMD -MP -O2 ${WARNINGS} ${FIXME_WARNINGS} --std=c++11
 
 UNAME := $(shell uname)
 ifeq ($(UNAME), Linux)

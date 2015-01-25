@@ -32,6 +32,8 @@
 // Only define map functions if they are available
 #define NIFPP_HAS_MAPS ((ERL_NIF_MAJOR_VERSION > 2) || (ERL_NIF_MAJOR_VERSION==2 && ERL_NIF_MINOR_VERSION >= 6))
 
+#define UNUSED(expr) (void)(expr)
+
 #include <string>
 #include <tuple>
 #include <array>
@@ -144,7 +146,7 @@ protected:
 
 private:
     // there's no nice way to keep track of owns_data in copies, so just prevent copying
-    binary(const binary &src){}
+    binary(const binary &src){UNUSED(src);}
 };
 
 #ifdef NIFPP_INTRUSIVE_UNIT_TEST
@@ -196,12 +198,14 @@ template<typename TK, typename TV> TERM make(ErlNifEnv *env, const std::unordere
 // ERL_NIF_TERM
 inline int get(ErlNifEnv *env, ERL_NIF_TERM term, TERM &var)
 {
-    var = TERM(term);
-    return 1;
+  UNUSED(env);
+  var = TERM(term);
+  return 1;
 }
 inline TERM make(ErlNifEnv *env, const TERM term)
 {
-    return TERM(term);
+  UNUSED(env);
+  return TERM(term);
 }
 
 // str_atom
@@ -392,7 +396,8 @@ inline int get(ErlNifEnv *env, ERL_NIF_TERM term, ErlNifPid &var)
 
 inline TERM make(ErlNifEnv *env, const ErlNifPid &var)
 {
-    return TERM(enif_make_pid(env, &var));
+  UNUSED(env);
+  return TERM(enif_make_pid(env, &var));
 }
 
 
@@ -741,7 +746,10 @@ namespace detail
         template<typename ...Ts>
         static int go(ErlNifEnv *env, std::tuple<Ts...> &t, const ERL_NIF_TERM *end)
         {
-            return 1;
+          UNUSED(end);
+          UNUSED(t);
+          UNUSED(env);
+          return 1;
         }
     };
 } // namespace detail
@@ -785,7 +793,11 @@ namespace detail
     {
         template<typename ...Ts>
         static void go(ErlNifEnv *env, const std::tuple<Ts...> &t, ERL_NIF_TERM *end)
-        {}
+        {
+          UNUSED(end);
+          UNUSED(t);
+          UNUSED(env);
+        }
     };
 } // namespace detail
 

@@ -1,4 +1,4 @@
--module(cookie_bouncer).
+-module(strg).
 -export([incr/2, val/2, delete/1, new/2]).
 -on_load(init/0).
 
@@ -8,8 +8,8 @@ priv_dir(Mod) ->
     filename:join(filename:dirname(Ebin), "priv").
 
 init() ->
-    PrivDir = priv_dir(cookie_bouncer),
-    ok = erlang:load_nif(filename:join(PrivDir, "cookie_bouncer"), 0).
+    PrivDir = priv_dir(strg),
+    ok = erlang:load_nif(filename:join(PrivDir, "strg"), 0).
 
 new(Name, []) ->
     new_private(Name, -1.0, 10000);

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "cookie_bouncer.hpp"
+#include "strg_table.hpp"
 #include "counter.hpp"
 #include "nifpp.h"
 
@@ -9,7 +9,7 @@
 #define UNUSED(expr) (void)(expr)
 
 static std::unordered_map<nifpp::str_atom,
-                          adroll::cookie_bouncer<std::string, adroll::counter>> meta_map;
+                          adroll::strg_table<std::string, adroll::counter>> meta_map;
 
 extern "C" {
 
@@ -113,6 +113,6 @@ extern "C" {
                                     {"delete", 1, cb_delete_nif},
                                     {"val", 2, cb_val_nif} };
 
-  ERL_NIF_INIT(cookie_bouncer, nif_funcs, NULL, NULL, NULL, NULL)
+  ERL_NIF_INIT(strg, nif_funcs, NULL, NULL, NULL, NULL)
 
 } // extern "C"

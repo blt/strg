@@ -10,6 +10,6 @@ case "$1" in
         ;;
 
     *)
-        make all && cp cookie_bouncer.so ../priv/
+        make all && cp strg.so ../priv/
         ;;
 esac

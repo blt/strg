@@ -1,6 +1,6 @@
-{application, cookie_bouncer,
+{application, strg,
  [
-  {description, "A NIF cookie bouncer"},
+  {description, "A NIF ETS elaboration jam."},
   {vsn, "0.0.1"},
   {modules, []},
   {registered, []},

@@ -1,5 +1,5 @@
-#ifndef __DECAYING_COUNTER_HPP__
-#define __DECAYING_COUNTER_HPP__
+#ifndef __ADROLL_COUNTER_HPP__
+#define __ADROLL_COUNTER_HPP__
 
 #include <cmath>
 #include <ctime>

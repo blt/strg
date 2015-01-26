@@ -1,4 +1,4 @@
--module(cookie_bouncer_SUITE).
+-module(strg_SUITE).
 
 -include_lib("eunit/include/eunit.hrl").
 -include_lib("common_test/include/ct.hrl").
@@ -18,11 +18,11 @@ all() ->
     ].
 
 init_per_suite(Config) ->
-    application:start(cookie_bouncer),
+    application:start(strg),
     Config.
 
 end_per_suite(_Config) ->
-    application:stop(cookie_bouncer),
+    application:stop(strg),
     ok.
 
 init_per_testcase(_Suite, Config) ->
@@ -36,38 +36,38 @@ end_per_testcase(_Suite, _Config) ->
 %%%===================================================================
 
 sanity_test(_Config) ->
-    ?assertMatch(ok,                     cookie_bouncer:new(tbl, [])),
-    ?assertMatch(ok,                     cookie_bouncer:new(tbl_no_decay_bool, [{decay, false}])),
-    ?assertMatch(ok,                     cookie_bouncer:new(tbl_decay_bool,    [{decay, true}])),
-    ?assertMatch(ok,                     cookie_bouncer:new(tbl_decay_explicit, [{half_life, 6.0}])),
-    ?assertMatch({error, no_such_table}, cookie_bouncer:val(no_such, "no such")),
-    ?assertMatch({error, no_such_table}, cookie_bouncer:incr(no_such, "no such")).
+    ?assertMatch(ok,                     strg:new(tbl, [])),
+    ?assertMatch(ok,                     strg:new(tbl_no_decay_bool, [{decay, false}])),
+    ?assertMatch(ok,                     strg:new(tbl_decay_bool,    [{decay, true}])),
+    ?assertMatch(ok,                     strg:new(tbl_decay_explicit, [{half_life, 6.0}])),
+    ?assertMatch({error, no_such_table}, strg:val(no_such, "no such")),
+    ?assertMatch({error, no_such_table}, strg:incr(no_such, "no such")).
 
 lru_test(_Config) ->
     Tbl = lru_test_tbl,
-    ok = cookie_bouncer:new(Tbl, [{decay, false}, {lru_max_size, 4}]),
+    ok = strg:new(Tbl, [{decay, false}, {lru_max_size, 4}]),
 
     %% load the cookie bouncer up to lru_max_size
-    cookie_bouncer:incr(Tbl, "one"),
-    cookie_bouncer:incr(Tbl, "two"),
-    cookie_bouncer:incr(Tbl, "three"),
-    cookie_bouncer:incr(Tbl, "four"),
+    strg:incr(Tbl, "one"),
+    strg:incr(Tbl, "two"),
+    strg:incr(Tbl, "three"),
+    strg:incr(Tbl, "four"),
 
     %% confirm the values are in place
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "one")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "two")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "three")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "four")),
+    ?assertMatch(1.0, strg:val(Tbl, "one")),
+    ?assertMatch(1.0, strg:val(Tbl, "two")),
+    ?assertMatch(1.0, strg:val(Tbl, "three")),
+    ?assertMatch(1.0, strg:val(Tbl, "four")),
 
     %% push it past the post
-    cookie_bouncer:incr(Tbl, "five"),
+    strg:incr(Tbl, "five"),
 
     %% confirm we've lost a value
-    ?assertMatch(0.0, cookie_bouncer:val(Tbl, "one")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "two")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "three")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "four")),
-    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "five")),
+    ?assertMatch(0.0, strg:val(Tbl, "one")),
+    ?assertMatch(1.0, strg:val(Tbl, "two")),
+    ?assertMatch(1.0, strg:val(Tbl, "three")),
+    ?assertMatch(1.0, strg:val(Tbl, "four")),
+    ?assertMatch(1.0, strg:val(Tbl, "five")),
 
     ok.
 
@@ -75,64 +75,64 @@ decaying_tables_decay(_Config) ->
     Tbl = decaying_tables_decay_tbl,
     Key = "k",
 
-    ?assertMatch(ok, cookie_bouncer:new(Tbl, [{half_life, 1.00}])),
-    {ok, 1.0} = cookie_bouncer:incr(Tbl, Key),
-    {ok, 2.0} = cookie_bouncer:incr(Tbl, Key),
+    ?assertMatch(ok, strg:new(Tbl, [{half_life, 1.00}])),
+    {ok, 1.0} = strg:incr(Tbl, Key),
+    {ok, 2.0} = strg:incr(Tbl, Key),
     timer:sleep(1000),
-    ?assert(cookie_bouncer:val(Tbl, Key) < 2.0).
+    ?assert(strg:val(Tbl, Key) < 2.0).
 
 counter_tables_do_not_decay(_Config) ->
     Tbl = counter_tables_do_not_decay_tbl,
     Key = "k",
 
-    ?assertMatch(ok, cookie_bouncer:new(Tbl, [{decay, false}])),
-    {ok, 1.0} = cookie_bouncer:incr(Tbl, Key),
-    {ok, 2.0} = cookie_bouncer:incr(Tbl, Key),
+    ?assertMatch(ok, strg:new(Tbl, [{decay, false}])),
+    {ok, 1.0} = strg:incr(Tbl, Key),
+    {ok, 2.0} = strg:incr(Tbl, Key),
     timer:sleep(500),
-    ?assertMatch(2.0, cookie_bouncer:val(Tbl, Key)).
+    ?assertMatch(2.0, strg:val(Tbl, Key)).
 
 
 create_and_incr(_Config) ->
     Tbl = create_and_incr_table,
     Key = "create_and_incr_key",
 
-    ?assertMatch(ok, cookie_bouncer:new(Tbl, [])),
-    ?assertMatch(0.0, cookie_bouncer:val(Tbl, Key)),
-    _ = [cookie_bouncer:incr(Tbl, Key) || _ <- lists:seq(1,100)],
-    ?assert(cookie_bouncer:val(Tbl, Key) > 95).
+    ?assertMatch(ok, strg:new(Tbl, [])),
+    ?assertMatch(0.0, strg:val(Tbl, Key)),
+    _ = [strg:incr(Tbl, Key) || _ <- lists:seq(1,100)],
+    ?assert(strg:val(Tbl, Key) > 95).
 
 delete_table(_Config) ->
     Tbl = delete_table_table,
     Key = "key",
 
-    ?assertMatch({error, no_such_table}, cookie_bouncer:val(Tbl, Key)),
-    ?assertMatch(ok, cookie_bouncer:new(Tbl, [])),
-    ?assertMatch(0.0, cookie_bouncer:val(Tbl, Key)),
-    ?assertMatch(ok, cookie_bouncer:delete(Tbl)),
-    ?assertMatch({error, no_such_table}, cookie_bouncer:val(Tbl, Key)).
+    ?assertMatch({error, no_such_table}, strg:val(Tbl, Key)),
+    ?assertMatch(ok, strg:new(Tbl, [])),
+    ?assertMatch(0.0, strg:val(Tbl, Key)),
+    ?assertMatch(ok, strg:delete(Tbl)),
+    ?assertMatch({error, no_such_table}, strg:val(Tbl, Key)).
 
 sandblast(_Config) ->
     Tbl = sandblast_table,
     Key = "key",
 
-    ?assertMatch(ok, cookie_bouncer:new(Tbl, [])),
+    ?assertMatch(ok, strg:new(Tbl, [])),
 
     Parent = self(),
 
     spawn_link(fun() ->
-                       _ = [cookie_bouncer:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
+                       _ = [strg:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
                         Parent ! done
                end),
     spawn_link(fun() ->
-                       _ = [cookie_bouncer:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
+                       _ = [strg:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
                         Parent ! done
                end),
     spawn_link(fun() ->
-                       _ = [cookie_bouncer:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
+                       _ = [strg:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
                         Parent ! done
                end),
     spawn_link(fun() ->
-                       _ = [cookie_bouncer:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
+                       _ = [strg:incr(Tbl, Key) || _ <- lists:seq(1,10000)],
                         Parent ! done
                end),
 
@@ -141,7 +141,7 @@ sandblast(_Config) ->
     ok = receive done -> ok end,
     ok = receive done -> ok end,
 
-    ?assert(cookie_bouncer:val(Tbl, Key) > 39000),
+    ?assert(strg:val(Tbl, Key) > 39000),
 
     ok.
 
@@ -168,7 +168,7 @@ fsm_test(_Config) ->
     Tbls = [fsm_test_table_0, fsm_test_table_1, fsm_test_table_2, fsm_test_table_3,
             fsm_test_table_4, fsm_test_table_5, fsm_test_table_6, fsm_test_table_7],
     ?assertMatch(?TOTTBLS, length(Tbls)),
-    [ok, ok, ok, ok, ok, ok, ok, ok] = [cookie_bouncer:new(Tbl, []) || Tbl <- Tbls],
+    [ok, ok, ok, ok, ok, ok, ok, ok] = [strg:new(Tbl, []) || Tbl <- Tbls],
 
     spawn_workers(Workers, nothing),
     wait_for_workers(Workers),
@@ -196,7 +196,7 @@ init(State) ->
 incr_key(State) ->
     Key = rnd_key(),
     Tbl = rnd_tbl(),
-    {ok, _} = cookie_bouncer:incr(Tbl, Key),
+    {ok, _} = strg:incr(Tbl, Key),
 
     NextStates = [{500, fun incr_key/1}, {1000, fun read_val/1}],
     (prob_choice(NextStates))(State).
@@ -204,7 +204,7 @@ incr_key(State) ->
 read_val(State) ->
     Key = rnd_key(),
     Tbl = rnd_tbl(),
-    _ = cookie_bouncer:val(Tbl, Key),
+    _ = strg:val(Tbl, Key),
 
     NextStates = [{10, fun init/1}, {505, fun incr_key/1}, {1000, fun read_val/1}],
     (prob_choice(NextStates))(State).

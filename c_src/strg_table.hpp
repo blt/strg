@@ -1,5 +1,5 @@
-#ifndef __COOKIE_BOUNCER_HPP__
-#define __COOKIE_BOUNCER_HPP__
+#ifndef __ADROLL_STRG_TABLE_HPP__
+#define __ADROLL_STRG_TABLE_HPP__
 
 #include <unordered_map>
 #include <utility>
@@ -10,16 +10,16 @@
 namespace adroll {
 
   template<typename K, typename counter>
-  class cookie_bouncer {
+  class strg_table {
   public:
     typedef K key_t;
     typedef counter counter_t;
     typedef std::list<key_t> access_history_t;
 
-    cookie_bouncer(double halflife = 60.0, bool decay_ = true, size_t capacity_ = 10000U)
+    strg_table(double halflife = 60.0, bool decay_ = true, size_t capacity_ = 10000U)
       : tau(halflife / std::log(2)), decay(decay_), capacity(capacity_) {}
 
-    cookie_bouncer(const cookie_bouncer&& cb)
+    strg_table(const strg_table&& cb)
       : tau(cb.tau), kv(cb.kv) {}
 
     double incr(const std::string key) {
@@ -62,8 +62,8 @@ namespace adroll {
       access_history.pop_front();
     }
 
-    cookie_bouncer(const cookie_bouncer&) = delete;
-    const cookie_bouncer& operator=(const cookie_bouncer&) = delete;
+    strg_table(const strg_table&) = delete;
+    const strg_table& operator=(const strg_table&) = delete;
   };
 
 }

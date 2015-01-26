@@ -9,7 +9,7 @@
 #define UNUSED(expr) (void)(expr)
 
 static std::unordered_map<nifpp::str_atom,
-                          adroll::cookie_bouncer<adroll::counter>> meta_map;
+                          adroll::cookie_bouncer<std::string, adroll::counter>> meta_map;
 
 extern "C" {
 
@@ -23,6 +23,9 @@ extern "C" {
       double halflife;
       nifpp::get_throws(env, argv[1], halflife);
 
+      uint lru_max_cache;
+      nifpp::get_throws(env, argv[2], lru_max_cache);
+
       if (halflife < 0.0) {
         decay_counters = false;
       }
@@ -31,7 +34,7 @@ extern "C" {
       if (search == meta_map.end()) {
         meta_map.emplace(std::piecewise_construct,
                          std::forward_as_tuple(atom_name),
-                         std::forward_as_tuple(halflife, decay_counters));
+                         std::forward_as_tuple(halflife, decay_counters, lru_max_cache));
       }
 
       nifpp::str_atom ok("ok");
@@ -106,7 +109,7 @@ extern "C" {
   }
 
   static ErlNifFunc nif_funcs[] = { {"incr", 2, cb_incr_nif},
-                                    {"new_private", 2, cb_new_nif},
+                                    {"new_private", 3, cb_new_nif},
                                     {"delete", 1, cb_delete_nif},
                                     {"val", 2, cb_val_nif} };
 

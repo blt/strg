@@ -8,6 +8,7 @@
 all() ->
     [
      sanity_test
+     , lru_test
      , decaying_tables_decay
      , counter_tables_do_not_decay
      , create_and_incr
@@ -41,6 +42,34 @@ sanity_test(_Config) ->
     ?assertMatch(ok,                     cookie_bouncer:new(tbl_decay_explicit, [{half_life, 6.0}])),
     ?assertMatch({error, no_such_table}, cookie_bouncer:val(no_such, "no such")),
     ?assertMatch({error, no_such_table}, cookie_bouncer:incr(no_such, "no such")).
+
+lru_test(_Config) ->
+    Tbl = lru_test_tbl,
+    ok = cookie_bouncer:new(Tbl, [{decay, false}, {lru_max_size, 4}]),
+
+    %% load the cookie bouncer up to lru_max_size
+    cookie_bouncer:incr(Tbl, "one"),
+    cookie_bouncer:incr(Tbl, "two"),
+    cookie_bouncer:incr(Tbl, "three"),
+    cookie_bouncer:incr(Tbl, "four"),
+
+    %% confirm the values are in place
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "one")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "two")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "three")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "four")),
+
+    %% push it past the post
+    cookie_bouncer:incr(Tbl, "five"),
+
+    %% confirm we've lost a value
+    ?assertMatch(0.0, cookie_bouncer:val(Tbl, "one")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "two")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "three")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "four")),
+    ?assertMatch(1.0, cookie_bouncer:val(Tbl, "five")),
+
+    ok.
 
 decaying_tables_decay(_Config) ->
     Tbl = decaying_tables_decay_tbl,

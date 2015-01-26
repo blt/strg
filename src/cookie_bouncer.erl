@@ -12,17 +12,20 @@ init() ->
     ok = erlang:load_nif(filename:join(PrivDir, "cookie_bouncer"), 0).
 
 new(Name, []) ->
-    new_private(Name, -1.0);
-new(Name, [{decay, false}]) ->
-    new_private(Name, -1.0);
-new(Name, [{decay, true}]) ->
-    new_private(Name, 60.0);
-new(Name, [{half_life, HL}]) when HL >= 0.0 ->
-    new_private(Name, HL).
+    new_private(Name, -1.0, 10000);
+new(Name, [{decay, false} | Rest]) ->
+    LRUMaxSize = option(Rest, lru_max_size, 10000),
+    new_private(Name, -1.0, LRUMaxSize);
+new(Name, [{decay, true} | Rest]) ->
+    LRUMaxSize = option(Rest, lru_max_size, 10000),
+    new_private(Name, 60.0, LRUMaxSize);
+new(Name, [{half_life, HL} | Rest]) when HL >= 0.0 ->
+    LRUMaxSize = option(Rest, lru_max_size, 10000),
+    new_private(Name, HL, LRUMaxSize).
 
 %% NOTE: Why does this function exist? I couldn't figure out how to part an
 %% option list in NIF land.
-new_private(_Name, _Options) ->
+new_private(_Name, _DecayBool, _LRUMaxSize) ->
     exit(nif_library_not_loaded).
 
 delete(_Name) ->
@@ -33,3 +36,13 @@ incr(_Tbl, _Key) ->
 
 val(_Tbl, _Key) ->
     exit(nif_library_not_loaded).
+
+%%%===================================================================
+%%% Internal Functions
+%%%===================================================================
+
+option(L, Key, Default) ->
+    case lists:keyfind(Key, 1, L) of
+        false -> Default;
+        {Key, Other} -> Other
+    end.

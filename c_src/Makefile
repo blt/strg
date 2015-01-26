@@ -30,7 +30,7 @@ ifeq ($(UNAME), Darwin)
 LDFLAGS=-undefined dynamic_lookup -dynamiclib
 endif
 
-SOURCES=cookie_bouncer.cpp
+SOURCES=erl_nif_cb.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
 DEP=$(SOURCES:.cpp=.d)
 -include $(DEP)

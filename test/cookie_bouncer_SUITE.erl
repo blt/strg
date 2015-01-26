@@ -7,11 +7,13 @@
 
 all() ->
     [
-     sanity_test,
-     create_and_incr,
-     delete_table,
-     sandblast,
-     fsm_test
+     sanity_test
+     , decaying_tables_decay
+     , counter_tables_do_not_decay
+     , create_and_incr
+     , delete_table
+     , sandblast
+     , fsm_test
     ].
 
 init_per_suite(Config) ->
@@ -34,8 +36,32 @@ end_per_testcase(_Suite, _Config) ->
 
 sanity_test(_Config) ->
     ?assertMatch(ok,                     cookie_bouncer:new(tbl, [])),
+    ?assertMatch(ok,                     cookie_bouncer:new(tbl_no_decay_bool, [{decay, false}])),
+    ?assertMatch(ok,                     cookie_bouncer:new(tbl_decay_bool,    [{decay, true}])),
+    ?assertMatch(ok,                     cookie_bouncer:new(tbl_decay_explicit, [{half_life, 6.0}])),
     ?assertMatch({error, no_such_table}, cookie_bouncer:val(no_such, "no such")),
     ?assertMatch({error, no_such_table}, cookie_bouncer:incr(no_such, "no such")).
+
+decaying_tables_decay(_Config) ->
+    Tbl = decaying_tables_decay_tbl,
+    Key = "k",
+
+    ?assertMatch(ok, cookie_bouncer:new(Tbl, [{half_life, 1.00}])),
+    {ok, 1.0} = cookie_bouncer:incr(Tbl, Key),
+    {ok, 2.0} = cookie_bouncer:incr(Tbl, Key),
+    timer:sleep(1000),
+    ?assert(cookie_bouncer:val(Tbl, Key) < 2.0).
+
+counter_tables_do_not_decay(_Config) ->
+    Tbl = counter_tables_do_not_decay_tbl,
+    Key = "k",
+
+    ?assertMatch(ok, cookie_bouncer:new(Tbl, [{decay, false}])),
+    {ok, 1.0} = cookie_bouncer:incr(Tbl, Key),
+    {ok, 2.0} = cookie_bouncer:incr(Tbl, Key),
+    timer:sleep(500),
+    ?assertMatch(2.0, cookie_bouncer:val(Tbl, Key)).
+
 
 create_and_incr(_Config) ->
     Tbl = create_and_incr_table,
@@ -94,8 +120,8 @@ sandblast(_Config) ->
 %%% FSM Test
 %%%===================================================================
 
--define(TOTWRKS, 10000).
--define(TOTKEYS, 10).
+-define(TOTWRKS, 1000).
+-define(TOTKEYS, 100).
 -define(TOTTBLS, 8).
 
 rnd_key() -> integer_to_list(random:uniform(?TOTKEYS)).
@@ -124,7 +150,7 @@ spawn_workers(0, _) -> ok;
 spawn_workers(N, State) ->
     Parent = self(),
     spawn_link(fun() ->
-                       ok = init(State),
+                       init(State),
                        Parent ! N
                end),
     spawn_workers(N-1, State).
@@ -141,7 +167,7 @@ init(State) ->
 incr_key(State) ->
     Key = rnd_key(),
     Tbl = rnd_tbl(),
-    ok = cookie_bouncer:incr(Tbl, Key),
+    {ok, _} = cookie_bouncer:incr(Tbl, Key),
 
     NextStates = [{500, fun incr_key/1}, {1000, fun read_val/1}],
     (prob_choice(NextStates))(State).

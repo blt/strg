@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include "cookie_bouncer.hpp"
-#include "decaying_counter.hpp"
+#include "counter.hpp"
 #include "nifpp.h"
 
 #include <unordered_map>
@@ -9,12 +9,7 @@
 #define UNUSED(expr) (void)(expr)
 
 static std::unordered_map<nifpp::str_atom,
-                          adroll::cookie_bouncer<adroll::decaying_counter>> meta_map;
-
-static adroll::cookie_bouncer<adroll::decaying_counter> cb;
-
-using std::make_tuple;
-using std::ref;
+                          adroll::cookie_bouncer<adroll::counter>> meta_map;
 
 extern "C" {
 
@@ -24,11 +19,19 @@ extern "C" {
       nifpp::str_atom atom_name;
       nifpp::get_throws(env, argv[0], atom_name);
 
+      bool decay_counters = true;
+      double halflife;
+      nifpp::get_throws(env, argv[1], halflife);
+
+      if (halflife < 0.0) {
+        decay_counters = false;
+      }
+
       auto search = meta_map.find(atom_name);
       if (search == meta_map.end()) {
         meta_map.emplace(std::piecewise_construct,
                          std::forward_as_tuple(atom_name),
-                         std::forward_as_tuple());
+                         std::forward_as_tuple(halflife, decay_counters));
       }
 
       nifpp::str_atom ok("ok");
@@ -63,9 +66,10 @@ extern "C" {
 
       auto search = meta_map.find(atom_name);
       if (search != meta_map.end()) {
-        (search->second).incr(key);
+        double old_val = (search->second).incr(key);
         nifpp::str_atom ok("ok");
-        return nifpp::make(env, ok);
+        auto tup = std::make_tuple(std::ref(ok), std::ref(old_val));
+        return nifpp::make(env, tup);
       } else {
         nifpp::str_atom error("error");
         nifpp::str_atom no_such_tbl("no_such_table");
@@ -102,7 +106,7 @@ extern "C" {
   }
 
   static ErlNifFunc nif_funcs[] = { {"incr", 2, cb_incr_nif},
-                                    {"new", 2, cb_new_nif},
+                                    {"new_private", 2, cb_new_nif},
                                     {"delete", 1, cb_delete_nif},
                                     {"val", 2, cb_val_nif} };
 

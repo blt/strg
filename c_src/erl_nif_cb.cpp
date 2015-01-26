@@ -66,9 +66,9 @@ extern "C" {
 
       auto search = meta_map.find(atom_name);
       if (search != meta_map.end()) {
-        double old_val = (search->second).incr(key);
+        double val = (search->second).incr(key);
         nifpp::str_atom ok("ok");
-        auto tup = std::make_tuple(std::ref(ok), std::ref(old_val));
+        auto tup = std::make_tuple(std::ref(ok), std::ref(val));
         return nifpp::make(env, tup);
       } else {
         nifpp::str_atom error("error");

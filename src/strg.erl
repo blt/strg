@@ -23,10 +23,13 @@ new(Name, [{half_life, HL} | Rest]) when HL >= 0.0 ->
     LRUMaxSize = option(Rest, lru_max_size, 10000),
     new_private(Name, HL, LRUMaxSize).
 
-%% NOTE: Why does this function exist? I couldn't figure out how to part an
-%% option list in NIF land.
-new_private(_Name, _DecayBool, _LRUMaxSize) ->
+info(Name) ->
     exit(nif_library_not_loaded).
+
+info(Name, Key) ->
+    InfoPL = info(Name),
+    {Key, Value} = lists:keyfind(Key, 1, InfoPL),
+    Value.
 
 delete(_Name) ->
     exit(nif_library_not_loaded).
@@ -40,6 +43,11 @@ val(_Tbl, _Key) ->
 %%%===================================================================
 %%% Internal Functions
 %%%===================================================================
+
+%% NOTE: Why does this function exist? I couldn't figure out how to part an
+%% option list in NIF land.
+new_private(_Name, _DecayBool, _LRUMaxSize) ->
+    exit(nif_library_not_loaded).
 
 option(L, Key, Default) ->
     case lists:keyfind(Key, 1, L) of

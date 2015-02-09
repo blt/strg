@@ -48,6 +48,10 @@ namespace adroll {
       }
     }
 
+    unsigned int size() {
+      return kv.size();
+    }
+
   private:
     const double tau;
     const bool decay;

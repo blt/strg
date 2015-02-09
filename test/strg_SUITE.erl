@@ -8,6 +8,7 @@
 all() ->
     [
      sanity_test
+     , size_test
      , lru_test
      , decaying_tables_decay
      , counter_tables_do_not_decay
@@ -42,6 +43,18 @@ sanity_test(_Config) ->
     ?assertMatch(ok,                     strg:new(tbl_decay_explicit, [{half_life, 6.0}])),
     ?assertMatch({error, no_such_table}, strg:val(no_such, "no such")),
     ?assertMatch({error, no_such_table}, strg:incr(no_such, "no such")).
+
+size_test(_Config) ->
+    Tbl = size_test_tbl,
+    ok = strg:new(Tbl, []),
+
+    ?assertMatch(0, strg:info(Tbl, size)),
+    strg:incr(Tbl, "one"),
+    strg:incr(Tbl, "two"),
+    strg:incr(Tbl, "three"),
+    strg:incr(Tbl, "four"),
+    ?assertMatch(4, strg:info(Tbl, size)),
+    ?assertMatch([{size, 4}], strg:info(Tbl)).
 
 lru_test(_Config) ->
     Tbl = lru_test_tbl,

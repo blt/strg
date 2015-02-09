@@ -58,6 +58,33 @@ extern "C" {
     return enif_make_badarg(env);
   }
 
+  static ERL_NIF_TERM cb_info_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
+    UNUSED(argc);
+    try {
+      nifpp::str_atom atom_name;
+      nifpp::get_throws(env, argv[0], atom_name);
+
+      auto search = meta_map.find(atom_name);
+      if (search != meta_map.end()) {
+        std::vector<ERL_NIF_TERM> info_list;
+
+        nifpp::str_atom sz_atom("size");
+        unsigned int sz = (search->second).size();
+        auto size_tup = std::make_tuple(std::ref(sz_atom), std::ref(sz));
+        info_list.push_back(size_tup);
+
+        nifpp::make(env, info_list);
+      } else {
+        nifpp::str_atom error("error");
+        nifpp::str_atom no_such_tbl("no_such_table");
+        auto tup = std::make_tuple(std::ref(error), std::ref(no_such_tbl));
+        return nifpp::make(env, tup);
+      }
+    }
+    catch(nifpp::badarg) {}
+    return enif_make_badarg(env);
+  }
+
   static ERL_NIF_TERM cb_incr_nif(ErlNifEnv* env, int argc, const ERL_NIF_TERM argv[]) {
     UNUSED(argc);
     try {
@@ -111,6 +138,7 @@ extern "C" {
   static ErlNifFunc nif_funcs[] = { {"incr", 2, cb_incr_nif},
                                     {"new_private", 3, cb_new_nif},
                                     {"delete", 1, cb_delete_nif},
+                                    {"info_private", 1, cb_info_nif},
                                     {"val", 2, cb_val_nif} };
 
   ERL_NIF_INIT(strg, nif_funcs, NULL, NULL, NULL, NULL)

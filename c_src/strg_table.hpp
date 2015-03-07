@@ -6,6 +6,7 @@
 #include <mutex>
 #include <thread>
 #include <list>
+#include <cmath>
 
 namespace adroll {
 
@@ -17,10 +18,12 @@ namespace adroll {
     typedef std::list<key_t> access_history_t;
 
     strg_table(double halflife = 60.0, bool decay_ = true, size_t capacity_ = 10000U)
-      : tau(halflife / std::log(2)), decay(decay_), capacity(capacity_) {}
+      : tau(halflife / std::log(2)), decay(decay_), capacity(capacity_), mtx(),
+        kv(), access_history() {}
 
     strg_table(const strg_table&& cb)
-      : tau(cb.tau), kv(cb.kv) {}
+      : tau(cb.tau), decay(cb.decay), capacity(cb.capacity), mtx(cb.mtx),
+        kv(cb.kv), access_history(cb.access_history) {}
 
     double incr(const std::string key) {
       std::lock_guard<std::mutex> lock(mtx);
@@ -48,7 +51,7 @@ namespace adroll {
       }
     }
 
-    unsigned int size() {
+    long unsigned int size() {
       return kv.size();
     }
 

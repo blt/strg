@@ -6,7 +6,7 @@ ifeq ($(UNAME), Darwin)
 LDFLAGS=-undefined dynamic_lookup -dynamiclib
 endif
 
-CC=c++
+CC=gcc
 WARNINGS=-Wall -Weffc++ -pedantic  \
     -pedantic-errors -Wextra -Waggregate-return -Wcast-align \
     -Wcast-qual  -Wchar-subscripts  -Wcomment -Wconversion \

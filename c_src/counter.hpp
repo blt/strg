@@ -14,10 +14,10 @@ namespace adroll {
             const bool decay_ = true,
             const double value_ = 1.0,
             const std::time_t updated_time_ = std::time(nullptr))
-      : value(value_), decay(decay_), tau(tau_), updated_time(updated_time_) {}
+      : value(value_), decay(decay_), tau(tau_), updated_time(updated_time_), mtx() {}
 
     counter(const counter&& dc)
-      : value(dc.value), decay(dc.decay), tau(dc.tau), updated_time(dc.updated_time) {}
+      : value(dc.value), decay(dc.decay), tau(dc.tau), updated_time(dc.updated_time), mtx() {}
 
     double incr() {
       std::lock_guard<std::mutex> lock(mtx);

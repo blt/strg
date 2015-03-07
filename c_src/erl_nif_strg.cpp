@@ -4,6 +4,7 @@
 #include "counter.hpp"
 #include "nifpp.h"
 
+#include <cstdint>
 #include <unordered_map>
 
 #define UNUSED(expr) (void)(expr)
@@ -23,7 +24,7 @@ extern "C" {
       double halflife;
       nifpp::get_throws(env, argv[1], halflife);
 
-      uint lru_max_cache;
+      uintmax_t lru_max_cache;
       nifpp::get_throws(env, argv[2], lru_max_cache);
 
       if (halflife < 0.0) {
@@ -67,7 +68,7 @@ extern "C" {
       auto search = meta_map.find(atom_name);
       if (search != meta_map.end()) {
         nifpp::str_atom sz_atom("size");
-        unsigned int sz = (search->second).size();
+        long unsigned int sz = (search->second).size();
 
         auto tup = std::make_tuple(std::ref(sz_atom), std::ref(sz));
         return nifpp::make(env, tup);

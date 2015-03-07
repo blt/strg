@@ -1,3 +1,11 @@
+UNAME := $(shell uname)
+ifeq ($(UNAME), Linux)
+LDFLAGS=-shared -fPIC
+endif
+ifeq ($(UNAME), Darwin)
+LDFLAGS=-undefined dynamic_lookup -dynamiclib
+endif
+
 CC=c++
 WARNINGS=-Wall -Weffc++ -pedantic  \
     -pedantic-errors -Wextra -Waggregate-return -Wcast-align \
@@ -20,15 +28,7 @@ WARNINGS=-Wall -Weffc++ -pedantic  \
     -Wunused-value  -Wunused-variable  -Wvariadic-macros \
     -Wvolatile-register-var  -Wwrite-strings \
     -Wno-aggregate-return
-CFLAGS=-c -I${ERL_ROOT}/usr/include/ -isystem include/ -MMD -MP -O2 ${WARNINGS} --std=c++11
-
-UNAME := $(shell uname)
-ifeq ($(UNAME), Linux)
-LDFLAGS=-shared -fPIC
-endif
-ifeq ($(UNAME), Darwin)
-LDFLAGS=-undefined dynamic_lookup -dynamiclib
-endif
+CFLAGS=-c -I${ERL_ROOT}/usr/include/ -I/usr/local/lib/erlang/usr/include/ -isystem include/ ${LDFLAGS} -MMD -MP -O2 ${WARNINGS} --std=c++11
 
 SOURCES=erl_nif_strg.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
